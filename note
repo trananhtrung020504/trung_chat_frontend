@@ -1,0 +1,17 @@
+Ý nghĩa của domain:
+- Ai được phép phụ thuộc ai:
+- Ví dụ : nếu như không có domain thì use case sẽ có dạng thế này
+ - final AuthRepositoryImlp (từ tầng data) -> Lúc này nếu có 2 backend (nodejs,firebase) thì case login sẽ
+ UseCase phụ thuộc AuthRepositoryImpl (data)
+→ nếu có 2 backend (nodejs, firebase)
+→ sẽ bị sai vì đang phụ thuộc vào nodejs
+-> UseCase bị DÍNH CHẶT vào 1 backend cụ thể
+
+ - Còn trường hợp có domain thì sẽ có dạng thế này:
+ class AuthRepositoryNodejsImpl extends AuthRepository{}
+ class AuthRepositoryFirebaseImpl extends AuthRepository{}
+
+ và khi đó thì case login sẽ có dạng thế này:
+ final AuthRepositoryNodejsImpl (từ tầng data) -> Lúc này nếu có 2 backend (nodejs,firebase) thì case login
+sẽ đúng vì nó đang phụ thuộc vào AuthRepositoryNodejsImpl (tầng data): Mà thằng này đang viết logic
+ cho nodejs
