@@ -1,9 +1,26 @@
 import 'package:chatapp/core/theme.dart';
+import 'package:chatapp/features/chat/presentation/pages/chat_page.dart';
+import 'package:chatapp/features/conversations/presentation/bloc/conversations_bloc.dart';
+import 'package:chatapp/features/conversations/presentation/bloc/conversations_event.dart';
+import 'package:chatapp/features/conversations/presentation/bloc/conversations_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class MessagePage extends StatelessWidget {
-  const MessagePage({super.key});
+class ConversationsPage extends StatefulWidget {
+  const ConversationsPage({super.key});
 
+  @override
+  State<ConversationsPage> createState() => _ConversationsPageState();
+}
+
+class _ConversationsPageState extends State<ConversationsPage> {
+
+
+  @override
+  void initState() {
+    BlocProvider.of<ConversationsBloc>(context).add(FetchConversations());
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -47,11 +64,24 @@ class MessagePage extends StatelessWidget {
                 topRight: Radius.circular(50)
               )
             ),
-            child: ListView(
-              children: [
-                _buildMessageTile("Anh Trung", "AnhTrung@gmail.com", "08:43")
-              ],
-            ),
+            child: BlocBuilder<ConversationsBloc,ConversationsState>(builder: (context,state){
+              if (state is ConversationsLoading){
+                return Center(child: CircularProgressIndicator(),);
+              } else if (state is ConversationsLoaded){
+                return ListView.builder(
+                    itemCount: state.conversations.length,
+                    itemBuilder: (context,idx){
+                  final conversation = state.conversations[idx];
+                  return GestureDetector(onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => ChatPage(conversationId: conversation.id, mate: conversation.participantName)));
+                  }, child: _buildMessageTile(conversation.participantName, conversation.lastMessage, conversation.lastMessageTime.toString()));
+                });
+              }else if (state is ConversationsError){
+                return Center(child: Text(state.message));
+              }
+              return Center(child: Text("Không tìm thấy phòng hội thoại nào"),);
+
+            },)
           ))
 
         ],

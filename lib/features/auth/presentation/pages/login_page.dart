@@ -60,8 +60,7 @@ class _LoginPageState extends State<LoginPage> {
 
             }, listener: (context,state){
               if(state is AuthSuccess){
-                print('good');
-                Navigator.pushNamed(context, '/chatPage');
+                Navigator.pushNamedAndRemoveUntil(context, '/conversationsPage', (route) => false);
               }else if (state is AuthFailure){
                 ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(state.error))
@@ -69,7 +68,9 @@ class _LoginPageState extends State<LoginPage> {
               }
             }),
             SizedBox(height: 20,),
-            LoginPrompt(subTitle: 'Đăng kí ngay', title: 'Bạn chưa có tài khoản?  ', onTap: (){})
+            LoginPrompt(subTitle: 'Đăng kí ngay', title: 'Bạn chưa có tài khoản?  ', onTap: (){
+              Navigator.pushNamed(context, '/register');
+            })
           ],
         ),),
       ),

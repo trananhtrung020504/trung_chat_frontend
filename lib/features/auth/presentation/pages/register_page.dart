@@ -87,7 +87,9 @@ class _RegisterPageState extends State<RegisterPage> {
               SizedBox(height: 20),
               LoginPrompt(subTitle: 'Đăng nhập ngay',
                   title: 'Bạn đã có tài khoản?  ',
-                  onTap: () {})
+                  onTap: () {
+                Navigator.pushNamed(context, '/login');
+                  })
             ],
           ),
         ),
