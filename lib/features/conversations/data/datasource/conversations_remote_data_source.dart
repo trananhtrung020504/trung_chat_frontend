@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:chatapp/core/app_config.dart';
 import 'package:chatapp/features/conversations/data/models/conversation_model.dart';
 import 'package:chatapp/features/conversations/domain/entities/conversation_entity.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -25,4 +26,24 @@ class ConversationsRemoteDataSource {
       throw Exception("Lỗi khi lấy đoạn hội thoại");
     }
   }
+
+  Future<String> checkOrCreateConversation({required String contactId}) async {
+    final String token = await _storage.read(key: 'token') ?? '';
+
+    final res = await http.post(Uri.parse('${AppConfig.backend_endpoint}/api/conversations/check-or-create'),body: jsonEncode(
+        {
+          "contactId":contactId
+        }),headers: {
+      "Content-Type":'application/json',
+      "Authorization":"Bearer $token"
+    });
+
+    if(res.statusCode == 200){
+      var data = jsonDecode(res.body);
+      return data['conversationId'];
+    }else {
+      throw Exception('Lỗi khi kiểm tra hoặc tạo mới đoạn hội thoại');
+    }
+  }
+
 }

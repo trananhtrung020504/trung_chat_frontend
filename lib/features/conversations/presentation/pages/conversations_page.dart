@@ -1,5 +1,6 @@
 import 'package:chatapp/core/theme.dart';
 import 'package:chatapp/features/chat/presentation/pages/chat_page.dart';
+import 'package:chatapp/features/contacts/presentation/pages/contacts_page.dart';
 import 'package:chatapp/features/conversations/presentation/bloc/conversations_bloc.dart';
 import 'package:chatapp/features/conversations/presentation/bloc/conversations_event.dart';
 import 'package:chatapp/features/conversations/presentation/bloc/conversations_state.dart';
@@ -14,13 +15,12 @@ class ConversationsPage extends StatefulWidget {
 }
 
 class _ConversationsPageState extends State<ConversationsPage> {
-
-
   @override
   void initState() {
     BlocProvider.of<ConversationsBloc>(context).add(FetchConversations());
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -55,42 +55,70 @@ class _ConversationsPageState extends State<ConversationsPage> {
               ],
             ),
           ),
-          SizedBox(height: 10,),
-          Expanded(child: Container(
-            decoration: BoxDecoration(
-              color: DefaultColors.messageListPage,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(50),
-                topRight: Radius.circular(50)
-              )
+          SizedBox(height: 10),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: DefaultColors.messageListPage,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(50),
+                  topRight: Radius.circular(50),
+                ),
+              ),
+              child: BlocBuilder<ConversationsBloc, ConversationsState>(
+                builder: (context, state) {
+                  if (state is ConversationsLoading) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (state is ConversationsLoaded) {
+                    return ListView.builder(
+                      itemCount: state.conversations.length,
+                      itemBuilder: (context, idx) {
+                        final conversation = state.conversations[idx];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChatPage(
+                                  conversationId: conversation.id,
+                                  mate: conversation.participantName,
+                                ),
+                              ),
+                            );
+                          },
+                          child: _buildMessageTile(
+                            conversation.participantName,
+                            conversation.lastMessage,
+                            conversation.lastMessageTime.toString(),
+                          ),
+                        );
+                      },
+                    );
+                  } else if (state is ConversationsError) {
+                    return Center(child: Text(state.message));
+                  }
+                  return Center(
+                    child: Text("Không tìm thấy phòng hội thoại nào"),
+                  );
+                },
+              ),
             ),
-            child: BlocBuilder<ConversationsBloc,ConversationsState>(builder: (context,state){
-              if (state is ConversationsLoading){
-                return Center(child: CircularProgressIndicator(),);
-              } else if (state is ConversationsLoaded){
-                return ListView.builder(
-                    itemCount: state.conversations.length,
-                    itemBuilder: (context,idx){
-                  final conversation = state.conversations[idx];
-                  return GestureDetector(onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => ChatPage(conversationId: conversation.id, mate: conversation.participantName)));
-                  }, child: _buildMessageTile(conversation.participantName, conversation.lastMessage, conversation.lastMessageTime.toString()));
-                });
-              }else if (state is ConversationsError){
-                return Center(child: Text(state.message));
-              }
-              return Center(child: Text("Không tìm thấy phòng hội thoại nào"),);
-
-            },)
-          ))
-
+          ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ContactsPage()),
+          );
+        },
+        backgroundColor: DefaultColors.buttonColor,
+        child: Icon(Icons.contacts),
       ),
     );
   }
 }
-
-
 
 Widget _buildRecentContact({
   required BuildContext context,
@@ -112,24 +140,21 @@ Widget _buildRecentContact({
   );
 }
 
-Widget _buildMessageTile(String name, String message,String time){
+Widget _buildMessageTile(String name, String message, String time) {
   return ListTile(
-    contentPadding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+    contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
     leading: CircleAvatar(
       radius: 30,
       backgroundImage: NetworkImage('https://via.placeholder.com/150'),
     ),
-    title: Text(name,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
+    title: Text(
+      name,
+      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    ),
     subtitle: Text(
       message,
-      style: TextStyle(
-        color: Colors.grey,
-        overflow: TextOverflow.ellipsis
-      ),
+      style: TextStyle(color: Colors.grey, overflow: TextOverflow.ellipsis),
     ),
-    trailing: Text(
-      time,
-      style: TextStyle(color: Colors.grey),
-    ),
+    trailing: Text(time, style: TextStyle(color: Colors.grey)),
   );
 }
