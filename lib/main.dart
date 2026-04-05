@@ -1,3 +1,4 @@
+import 'package:chatapp/core/socket_service.dart';
 import 'package:chatapp/features/chat/data/datasource/message_remote_data_source.dart';
 import 'package:chatapp/features/chat/data/repositories/message_repository.dart';
 import 'package:chatapp/features/chat/domain/use_cases/fetch_message_use_case.dart';
@@ -19,7 +20,10 @@ import 'package:chatapp/features/conversations/presentation/pages/conversations_
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final socketService = SocketService();
+  await socketService.initSocket();
   final authRepository = AuthRepositoryImpl(authRemoteDataSource: AuthRemoteDataSource());
   final conversationRepository = ConversationsRepositoryImpl(remoteDataSource: ConversationsRemoteDataSource());
   final messageRepository = MessageRepositoryImpl(messageRemoteDataSource: MessageRemoteDataSource());
